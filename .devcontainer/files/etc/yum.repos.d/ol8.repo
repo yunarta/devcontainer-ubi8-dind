@@ -1,0 +1,5 @@
+[ol8_appstream]
+name=Oracle Linux 8 AppStream
+baseurl=https://yum.oracle.com/repo/OracleLinux/OL8/appstream/x86_64/
+enabled=1
+gpgcheck=0

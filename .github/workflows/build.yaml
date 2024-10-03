@@ -1,0 +1,47 @@
+name: build
+
+on: [push]
+
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p src | true
+
+      - id: download-docker
+        uses: actions/cache@v3
+        with:
+          key: docker
+          path: |
+            src/*
+
+      - run: |
+          wget https://download.docker.com/linux/static/test/x86_64/docker-27.3.1.tgz -O docker.tgz
+          wget https://download.docker.com/linux/static/test/x86_64/docker-rootless-extras-27.3.1.tgz -O rootless.tgz
+
+        working-directory: src
+        if: ${{ steps.download-docker.outputs.cache-hit != 'true' }}
+
+      - run: |
+          tar --extract --file src/docker.tgz --strip-components 1 --directory rpmbuild/SOURCES/ --no-same-owner
+          tar --extract --file src/rootless.tgz --strip-components 1 --directory rpmbuild/SOURCES/ \
+            'docker-rootless-extras/rootlesskit' \
+            'docker-rootless-extras/rootlesskit-docker-proxy' \
+            'docker-rootless-extras/vpnkit'
+
+          export BUILD_NUMBER=1
+          ls -ltR rpmbuild
+          rpmbuild --define "_topdir $PWD/rpmbuild" -ba rpmbuild/SPECS/mobilesolutionworks-dind-rootless.spec
+
+      - run: |
+          mkdir -p /opt/mobilesolutionworks
+          cp -rv rpmbuild/RPMS /opt/mobilesolutionworks
+          createrepo /opt/mobilesolutionworks/RPMS
+          cp msw.repo /etc/yum.repos.d
+      # - uses: actions/upload-artifact@v4.4.0
+      #   with:
+      #     name: dind
+      #     path: rpmbuild/RPMS/**/*

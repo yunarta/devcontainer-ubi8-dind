@@ -1,0 +1,5 @@
+-P self-hosted=-self-hosted
+-P ubi810=docker.mobilesolutionworks.com/redhat/ubi8
+--action-cache-path /workspaces/local-rpm/.act/action
+--cache-server-path .act/cache
+--artifact-server-path build

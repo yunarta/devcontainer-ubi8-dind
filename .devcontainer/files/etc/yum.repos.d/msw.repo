@@ -1,0 +1,5 @@
+[msw]
+name=NFS Repo
+baseurl=file:///opt/mobilesolutionworks/RPMS
+enabled=1
+gpgcheck=0
